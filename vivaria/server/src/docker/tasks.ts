@@ -1,0 +1,398 @@
+import { TRPCError } from '@trpc/server'
+import dotenv from 'dotenv'
+import { existsSync } from 'fs'
+import * as fs from 'fs/promises'
+import { tmpdir } from 'os'
+import * as path from 'path'
+import {
+  AgentBranchNumber,
+  RunId,
+  TRUNK,
+  TaskSource,
+  dedent,
+  exhaustiveSwitch,
+  parseWithGoodErrors,
+  type TaskInstructions,
+} from 'shared'
+import { z } from 'zod'
+import { BuildStep, TaskFamilyManifest, type Env, type TaskSetupData } from '../Driver'
+import { DriverImpl } from '../DriverImpl'
+import { getDefaultTaskHelperCode } from '../Drivers'
+import { validateBuildSteps } from '../aws/validateBuildSteps'
+import { type Host } from '../core/remote'
+import { AspawnOptions, aspawn, cmd, trustedArg } from '../lib'
+import { Config, DBTaskEnvironments, Git } from '../services'
+import { DockerFactory } from '../services/DockerFactory'
+import { TaskFamilyNotFoundError, TaskRepo, wellKnownDir } from '../services/Git'
+import { readYamlManifestFromDir } from '../util'
+import type { ImageBuildSpec } from './ImageBuilder'
+import { FakeLabApiKey } from './agents'
+import { BaseFetcher, TaskInfo, hashTaskOrAgentSource, taskDockerfilePath } from './util'
+
+const taskExportsDir = path.join(wellKnownDir, 'mp4-tasks-exports')
+
+export class TaskSetupDataNotFoundError extends Error {}
+export class TaskSetupDatas {
+  constructor(
+    private readonly config: Config,
+    private readonly dbTaskEnvironments: DBTaskEnvironments,
+    private readonly dockerFactory: DockerFactory,
+    private readonly taskFetcher: TaskFetcher,
+  ) {}
+
+  /** gets from variant from db if stored. stores if not. */
+  async getTaskSetupData(
+    host: Host,
+    ti: TaskInfo,
+    opts: { forRun: boolean; aspawnOptions?: AspawnOptions; create?: boolean },
+  ): Promise<TaskSetupData> {
+    if (!opts?.forRun) {
+      // TODO(maksym): Cache plain `viv task start` task setup datas too.
+      return this.getTaskSetupDataRaw(host, ti, opts)
+    }
+
+    const commitOrSourceHash = ti.source.type === 'gitRepo' ? ti.source.commitId : hashTaskOrAgentSource(ti.source)
+    const stored = await this.dbTaskEnvironments.getTaskSetupData(ti.id, commitOrSourceHash)
+    if (stored != null) {
+      return stored
+    } else if (!(opts.create ?? true)) {
+      throw new TaskSetupDataNotFoundError(
+        `Task setup data not found for ${ti.id} with commit or source hash ${commitOrSourceHash}`,
+      )
+    }
+
+    const taskSetupData = await this.getTaskSetupDataRaw(host, ti, opts)
+    await this.dbTaskEnvironments.insertTaskSetupData(ti.id, commitOrSourceHash, taskSetupData)
+    return taskSetupData
+  }
+
+  async getTaskInstructions(host: Host, ti: TaskInfo, opts: { forRun: boolean }): Promise<TaskInstructions> {
+    const taskSetupData = await this.getTaskSetupData(host, ti, opts)
+    return {
+      instructions: taskSetupData.instructions,
+      permissions: taskSetupData.permissions,
+      scoring: {
+        intermediate: taskSetupData.intermediateScoring,
+        visible_to_agent: taskSetupData.definition?.scoring?.visible_to_agent ?? true,
+        score_on_usage_limits: taskSetupData.definition?.scoring?.score_on_usage_limits ?? false,
+      },
+    }
+  }
+
+  private async getTaskSetupDataRaw(
+    host: Host,
+    ti: TaskInfo,
+    opts: { aspawnOptions?: AspawnOptions },
+  ): Promise<TaskSetupData> {
+    const taskManifest = (await this.taskFetcher.fetch(ti))?.manifest?.tasks?.[ti.taskName]
+
+    const requestedGpus = taskManifest?.resources?.gpu?.count_range?.[0] ?? 0
+    if (requestedGpus > 0 && !host.hasGPUs) {
+      throw new Error('Task requires GPUs, but GPUs are not supported on this machine.')
+    }
+
+    const driver = new DriverImpl(
+      ti.taskFamilyName,
+      ti.taskName,
+      async ({ pythonCode, args, user, workdir }) => {
+        const result = await this.dockerFactory.getForHost(host).runContainer(ti.imageName, {
+          command: ['python', trustedArg`-c`, pythonCode, ...(args ?? [])],
+          containerName: `${ti.containerName}-${Math.random().toString(36).slice(2)}`,
+          user,
+          workdir,
+          cpus: taskManifest?.resources?.cpus,
+          memoryGb: taskManifest?.resources?.memory_gb,
+          remove: true,
+          aspawnOptions: { ...opts.aspawnOptions, timeout: this.config.TASK_OPERATION_TIMEOUT_MS },
+        })
+
+        return {
+          stdout: result.stdout,
+          stderr: result.stderr,
+          exitStatus: result.exitStatus!,
+        }
+      },
+      this.dockerFactory.getCopyFn(this.dockerFactory.getForHost(host), ti.containerName),
+      getDefaultTaskHelperCode(),
+    )
+
+    const getTaskSetupDataResult = await driver.getTaskSetupData()
+    switch (getTaskSetupDataResult.status) {
+      case 'taskNotFound':
+        throw new TaskNotFoundError(ti.taskFamilyName, ti.taskName)
+      case 'parseFailed':
+        throw new Error(getTaskSetupDataResult.message)
+      case 'processFailed': {
+        const { exitStatus, stdout, stderr } = getTaskSetupDataResult.execResult
+        throw new Error(
+          `Error getting task setup data.\n\nExit status: ${exitStatus}\n\nStdout: ${stdout}\n\nStderr: ${stderr}`,
+        )
+      }
+    }
+
+    const taskSetupData = getTaskSetupDataResult.taskSetupData
+
+    let requiredEnvironmentVariables
+    if (ti.source.type === 'upload') {
+      // Require uploaded task families to specify all required environment variables instead of having some implicitly required.
+      requiredEnvironmentVariables = taskSetupData.requiredEnvironmentVariables
+    } else {
+      const nonUniqueRequiredEnvironmentVariables = [
+        // - Everything hard-coded in Vivaria
+        'OPENAI_API_BASE_URL',
+        // - Everything in taskExtracted.requiredEnvironmentVariables
+        ...taskSetupData.requiredEnvironmentVariables,
+      ]
+      requiredEnvironmentVariables = [...new Set(nonUniqueRequiredEnvironmentVariables)]
+    }
+
+    taskSetupData.definition ??= taskManifest ?? null
+    const gpuSpec = taskSetupData.definition?.resources?.gpu
+    if (gpuSpec != null && (gpuSpec.count_range?.[0] ?? 0) > 0) {
+      this.config.assertHasGpuSupport()
+    }
+    return {
+      ...taskSetupData,
+      requiredEnvironmentVariables,
+    }
+  }
+}
+
+/**
+ * Envs computes environment variables that are passed to TaskFamily methods.
+ * It is NOT for computing environment variables to pass to agents. TaskFamily methods get access to secrets
+ * from `secrets.env`, which shouldn't be given to agents.
+ */
+export class Envs {
+  constructor(
+    private readonly config: Config,
+    private readonly git: Git,
+  ) {}
+
+  async getEnvForRun(
+    host: Host,
+    source: TaskSource,
+    runId: RunId,
+    agentToken: string,
+    agentBranchNumber: AgentBranchNumber = TRUNK,
+  ): Promise<Env> {
+    const envForTaskEnvironment = await this.getEnvForTaskEnvironment(host, source)
+    return {
+      ...envForTaskEnvironment,
+      // Not adding ANTHROPIC_API_KEY because task authors should provide their own Anthropic API keys.
+      // Keeping OPENAI_API_KEY for backwards compatibility.
+      OPENAI_API_KEY: new FakeLabApiKey(runId, agentBranchNumber, agentToken).toString(),
+    }
+  }
+
+  async getEnvForTaskEnvironment(host: Host, source: TaskSource): Promise<Env> {
+    const envFromTaskSource = await this.getEnvFromTaskSource(source)
+    return {
+      ...envFromTaskSource,
+      ANTHROPIC_BASE_URL: `${this.config.getApiUrl(host)}/anthropic`,
+      OPENAI_API_BASE_URL: `${this.config.getApiUrl(host)}/openai/v1`,
+    }
+  }
+
+  private async getEnvFromTaskSource(source: TaskSource): Promise<Env> {
+    let envFileContents
+    if (source.type === 'upload') {
+      if (source.environmentPath == null) return {}
+      envFileContents = await fs.readFile(source.environmentPath, 'utf-8')
+    } else {
+      const taskRepo = await this.git.getOrCreateTaskRepo(source.repoName)
+      await taskRepo.fetch({
+        lock: true,
+        noTags: true,
+        remote: 'origin',
+        ref: source.commitId,
+      })
+      if (!(await taskRepo.doesPathExist({ ref: source.commitId, path: 'secrets.env' }))) {
+        return {}
+      }
+      envFileContents = await taskRepo.readFile({ ref: source.commitId, filename: 'secrets.env' })
+    }
+
+    return dotenv.parse(envFileContents)
+  }
+}
+
+export class TaskManifestParseError extends Error {}
+export class BadTaskRepoError extends Error {}
+
+export class TaskFetcher extends BaseFetcher<TaskInfo, FetchedTask> {
+  protected override getBaseDir(ti: TaskInfo, taskHash: string): string {
+    return path.join(taskExportsDir, `${ti.taskFamilyName}-${taskHash}`)
+  }
+
+  protected override getSource(ti: TaskInfo): TaskSource {
+    return ti.source
+  }
+
+  protected override async getFetchedObject(ti: TaskInfo, taskDir: string): Promise<FetchedTask> {
+    let manifest = null
+    // To error on typos.
+    try {
+      const rawManifest = await readYamlManifestFromDir(taskDir)
+      manifest =
+        rawManifest == null ? null : parseWithGoodErrors(TaskFamilyManifest.strict(), rawManifest, {}, 'manifest')
+    } catch (e) {
+      throw new TaskManifestParseError(e.message)
+    }
+
+    return new FetchedTask(ti, taskDir, manifest)
+  }
+
+  protected override async getOrCreateRepo(ti: TaskInfo & { source: TaskSource & { type: 'gitRepo' } }) {
+    let repo: TaskRepo
+    try {
+      repo = await this.git.getOrCreateTaskRepo(ti.source.repoName)
+      await repo.fetch({ lock: true, noTags: true, remote: 'origin', ref: ti.source.commitId })
+    } catch (e) {
+      throw new BadTaskRepoError(e.message)
+    }
+    if (!(await repo.doesPathExist({ ref: ti.source.commitId, path: ti.taskFamilyName }))) {
+      throw new TaskFamilyNotFoundError(ti.taskFamilyName)
+    }
+    return repo
+  }
+
+  protected override getArchiveDirPath(ti: TaskInfo) {
+    return ti.taskFamilyName
+  }
+
+  protected override async fetchAdditionalGit(
+    ti: TaskInfo & { source: TaskSource & { type: 'gitRepo' } },
+    tempDir: string,
+    repo: TaskRepo,
+  ): Promise<void> {
+    const commonTarballPath = path.join(path.dirname(tempDir), 'common.tar')
+    const result = await repo.createArchive({
+      ref: ti.source.commitId,
+      dirPath: 'common',
+      outputFile: commonTarballPath,
+      aspawnOptions: { dontThrowRegex: /fatal: not a valid object name/ },
+    })
+    if (result.exitStatus === 0) {
+      const commonDir = path.join(tempDir, 'common')
+      await fs.mkdir(commonDir, { recursive: true })
+      await aspawn(cmd`tar -xf ${commonTarballPath} -C ${commonDir}`)
+      await fs.unlink(commonTarballPath)
+    }
+  }
+
+  protected override async fetchAdditional(tempDir: string) {
+    await fs.cp('../python-package', path.join(tempDir, 'metr-task-standard'), { recursive: true })
+  }
+}
+
+export class FetchedTask {
+  constructor(
+    readonly info: TaskInfo,
+    readonly dir: string,
+    // TODO: Remove eslint override when TaskManifest has required fields.
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+    readonly manifest: TaskFamilyManifest | null = null,
+  ) {}
+}
+
+export class TaskNotFoundError extends TRPCError {
+  constructor(taskFamilyName: string, taskName: string) {
+    super({
+      code: 'NOT_FOUND',
+      message: `Task ${taskName} not found in task family ${taskFamilyName}`,
+    })
+  }
+}
+
+export async function makeTaskImageBuildSpec(
+  config: Config,
+  task: FetchedTask,
+  env: Env,
+  opts: { aspawnOptions?: AspawnOptions } = {},
+): Promise<ImageBuildSpec> {
+  const buildArgs: Record<string, string> = {
+    TASK_FAMILY_NAME: task.info.taskFamilyName,
+  }
+
+  const taskManifest = task.manifest?.tasks?.[task.info.taskName]
+  if (taskManifest?.resources?.gpu != null) {
+    config.assertHasGpuSupport()
+    buildArgs.IMAGE_DEVICE_TYPE = 'gpu'
+  }
+
+  const dockerfilePath = await maybeAddBuildStepsToTaskDockerfile(task.dir)
+
+  return {
+    imageName: task.info.imageName,
+    buildContextDir: task.dir,
+    ssh: config.TASK_BUILD_SSH_ARGUMENT!,
+    envSpec: {
+      secretId: 'env-vars',
+      env,
+    },
+    cache: true,
+    targetBuildStage: 'task',
+    dockerfile: dockerfilePath,
+    buildArgs,
+    aspawnOptions: opts.aspawnOptions,
+  }
+}
+
+// This is a temporary Vivaria-only feature to allow Vivaria users to iterate faster on tasks without having to make a
+// breaking Task Standard change.
+async function maybeAddBuildStepsToTaskDockerfile(buildContext: string): Promise<string> {
+  if (!existsSync(path.join(buildContext, 'build_steps.json'))) return taskDockerfilePath
+
+  const tempDir = await fs.mkdtemp(path.join(tmpdir(), 'task-image-dockerfile-'))
+  const dockerfilePath = path.join(tempDir, 'Dockerfile')
+
+  const taskDockerfileContent = await fs.readFile(taskDockerfilePath, 'utf-8')
+  const taskDockerfileLines = taskDockerfileContent.split('\n')
+  const copyIndex = taskDockerfileLines.findIndex(line => line.startsWith('COPY . .'))
+
+  const buildStepsFileContent = await fs.readFile(path.join(buildContext, 'build_steps.json'), 'utf-8')
+  const buildSteps = z.array(BuildStep).parse(JSON.parse(buildStepsFileContent))
+  const validatedBuildSteps = await validateBuildSteps(buildContext, buildSteps)
+
+  const dockerfileLinesFromBuildSteps = validatedBuildSteps.map(step => {
+    switch (step.type) {
+      case 'shell': {
+        const runArguments = [
+          `bash`,
+          `-c`,
+          dedent`
+            #!/bin/bash
+            set -euo pipefail
+            IFS=$'\\n\\t'
+
+            # Export environment variables from /run/secrets/env-vars
+            while IFS= read -r line; do
+                export "$line"
+            done < /run/secrets/env-vars
+
+            ${step.commands.join('\n')}
+          `.trim(),
+        ]
+        // Use the same mounts as the Task Standard Dockerfile uses when running TaskFamily#install.
+        return `RUN --mount=type=ssh --mount=type=secret,id=env-vars ${JSON.stringify(runArguments)}`
+      }
+      case 'file': {
+        const copyArguments = [step.sourceWithinTaskFamilyDirectory, step.destination]
+        return `COPY ${JSON.stringify(copyArguments)}`
+      }
+      default:
+        exhaustiveSwitch(step, 'build step')
+    }
+  })
+
+  const dockerfileLines = [
+    ...taskDockerfileLines.slice(0, copyIndex),
+    ...dockerfileLinesFromBuildSteps,
+    ...taskDockerfileLines.slice(copyIndex),
+  ]
+
+  await fs.writeFile(dockerfilePath, dockerfileLines.join('\n'), 'utf-8')
+
+  return dockerfilePath
+}

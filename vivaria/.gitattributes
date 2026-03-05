@@ -1,0 +1,8 @@
+# FIX: prevent Git converting shell script line endings to CRLF
+# on Windows, which causes container launch failures
+*.sh text eol=lf
+
+*.sky linguist-language=Starlark
+
+docs/llms-ctx.txt linguist-generated=true
+docs/llms-ctx-full.txt linguist-generated=true

@@ -1,0 +1,131 @@
+name: premerge
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  UV_VERSION: 0.7.20
+
+jobs:
+  check-ts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          # note: update along with the one in .npmrc
+          node-version: 20.11.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+        id: pnpm-install
+        with:
+          version: 9.11.0
+          run_install: false
+      # https://github.com/pnpm/action-setup#use-cache-to-reduce-installation-time
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path | tail -n 1)" >> $GITHUB_OUTPUT
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: pnpm install
+        run: pnpm install
+      - name: check typescript
+        run: pnpm exec tsc -b .
+      - name: check formatting
+        run: pnpm exec prettier --check . # Hint: To fix, run `pnpm -w run fmt`
+      - name: lint
+        run: pnpm exec eslint server shared ui --ext ts,tsx
+
+  build-and-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          # note: update along with the one in .npmrc
+          node-version: 20.11.1
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+        id: pnpm-install
+        with:
+          version: 9.11.0
+          run_install: false
+
+      # https://github.com/pnpm/action-setup#use-cache-to-reduce-installation-time
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path | tail -n 1)" >> $GITHUB_OUTPUT
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: pnpm install
+        run: pnpm install
+      - name: build server
+        run: node build.mjs
+        working-directory: ./server
+      - name: build ui
+        run: NODE_OPTIONS='--max-old-space-size=8192' pnpm exec vite build
+        working-directory: ./ui
+      - name: run ui tests
+        run: pnpm exec vitest --watch=false
+        working-directory: ./ui
+      - name: run shared tests
+        run: pnpm exec vitest --watch=false
+        working-directory: ./shared
+
+  check-python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
+        with:
+          version: "${{ env.UV_VERSION }}"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version-file: pyproject.toml
+
+      - name: Install dependencies
+        run: |-
+          uv sync --all-extras --all-groups --locked
+          echo "$(pwd)/.venv/bin" >> $GITHUB_PATH
+
+      - name: check pyright
+        run: pyright ./pyhooks ./cli
+
+      - name: check ruff
+        run: ruff check --exclude python-package --extend-exclude cli .
+
+      - name: test
+        run: pytest

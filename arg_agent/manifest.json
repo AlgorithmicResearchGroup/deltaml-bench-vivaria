@@ -1,0 +1,102 @@
+{
+    "defaultSettingsPack": "arg_default",
+    "settingsPacks": {
+        "arg_default": {
+            "description": "ARG Agent default configuration",
+            "model": "o3",
+            "max_iterations": 500,
+            "context_window_tokens": 16000,
+            "enable_reflection": true,
+            "enable_monitoring": true,
+            "max_concurrent_nodes": 1,
+            "time_limit_seconds": 1800,
+            "search_policy": {
+                "num_drafts": 1,
+                "debug_prob": 0.8,
+                "max_debug_depth": 8,
+                "min_debug_attempts": 3,
+                "search_strategy": "tree_search",
+                "force_continue_on_incomplete": true,
+                "min_iterations_before_stop": 15
+            },
+            "execution_timeouts": {
+                "python_execution": 3600,
+                "bash_execution": 6000,
+                "default_tool": 3000
+            }
+        },
+        "arg_reasoning": {
+            "description": "ARG Agent with o1 reasoning model",
+            "model": "o1-2024-12-17",
+            "max_iterations": 30,
+            "context_window_tokens": 20000,
+            "enable_reflection": true,
+            "enable_monitoring": true,
+            "max_concurrent_nodes": 4,
+            "time_limit_seconds": 2400,
+            "search_policy": {
+                "num_drafts": 2,
+                "debug_prob": 0.9,
+                "max_debug_depth": 12,
+                "min_debug_attempts": 4,
+                "search_strategy": "best_first",
+                "force_continue_on_incomplete": true,
+                "min_iterations_before_stop": 10
+            },
+            "execution_timeouts": {
+                "python_execution": 7200,
+                "bash_execution": 900,
+                "default_tool": 600
+            }
+        },
+        "arg_fast": {
+            "description": "ARG Agent fast configuration",
+            "model": "gpt-4o-mini-2024-07-18",
+            "max_iterations": 25,
+            "context_window_tokens": 8000,
+            "enable_reflection": false,
+            "enable_monitoring": true,
+            "max_concurrent_nodes": 12,
+            "time_limit_seconds": 900,
+            "search_policy": {
+                "num_drafts": 2,
+                "debug_prob": 0.6,
+                "max_debug_depth": 5,
+                "min_debug_attempts": 2,
+                "search_strategy": "breadth_first",
+                "force_continue_on_incomplete": false,
+                "min_iterations_before_stop": 8
+            },
+            "execution_timeouts": {
+                "python_execution": 1800,
+                "bash_execution": 300,
+                "default_tool": 180
+            }
+        },
+        "arg_comprehensive": {
+            "description": "ARG Agent comprehensive problem solving",
+            "model": "o3", 
+            "max_iterations": 100,
+            "context_window_tokens": 24000,
+            "enable_reflection": true,
+            "enable_monitoring": true,
+            "max_concurrent_nodes": 16,
+            "time_limit_seconds": 3600,
+            "search_policy": {
+                "num_drafts": 5,
+                "debug_prob": 0.95,
+                "max_debug_depth": 15,
+                "min_debug_attempts": 6,
+                "search_strategy": "tree_search",
+                "force_continue_on_incomplete": true,
+                "min_iterations_before_stop": 25
+            },
+            "execution_timeouts": {
+                "python_execution": 14400,
+                "bash_execution": 1800,
+                "default_tool": 900
+            },
+            "beam_width": 8
+        }
+    }
+}

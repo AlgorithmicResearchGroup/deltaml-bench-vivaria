@@ -1,0 +1,13 @@
+:4000 {
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy http://server:4001
+        encode gzip
+    }
+
+    handle {
+        root * /srv
+        file_server
+        encode gzip
+    }
+}

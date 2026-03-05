@@ -1,0 +1,163 @@
+x-backend-build-args: &id001
+  DOCKER_GID: ${VIVARIA_DOCKER_GID:-999}
+  NODE_UID: ${VIVARIA_NODE_UID:-1000}
+  PACKER_GITHUB_API_TOKEN: null
+  VIVARIA_SERVER_DEVICE_TYPE: ${VIVARIA_SERVER_DEVICE_TYPE:-cpu}
+  VIVARIA_VERSION: ${VIVARIA_VERSION:-}
+x-backend:
+  build: &id002
+    context: .
+    dockerfile: ./server.Dockerfile
+    target: server
+    args: *id001
+  user: node:${VIVARIA_DOCKER_GID:-999}
+  image: ghcr.io/metr/vivaria-server
+  volumes: &id003
+  - /var/run/docker.sock:/var/run/docker.sock
+  - tmp:/tmp
+  environment: &id004
+    PGSSLMODE: disable
+    PGHOST: database
+    PGPORT: 5432
+    VIVARIA_MIDDLEMAN_TYPE: builtin
+    OPENAI_API_URL: https://api.openai.com
+    FULL_INTERNET_NETWORK_NAME: ${COMPOSE_PROJECT_NAME}_full-internet
+    NO_INTERNET_NETWORK_NAME: ${COMPOSE_PROJECT_NAME}_no-internet
+    NO_INTERNET_TASK_ENVIRONMENT_SANDBOXING_MODE: docker-network
+    API_IP: server
+    MACHINE_NAME: server
+    NODE_ENV: production
+    PORT: 4001
+    ALLOW_GIT_OPERATIONS: ${ALLOW_GIT_OPERATIONS:-false}
+    USE_AUTH0: false
+  env_file: &id005
+  - .env.server
+services:
+  server:
+    build: *id002
+    user: node:${VIVARIA_DOCKER_GID:-999}
+    image: ghcr.io/metr/vivaria-server
+    volumes: *id003
+    environment: *id004
+    env_file: *id005
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:4001/health
+      interval: 1s
+      retries: 30
+    depends_on:
+      database:
+        condition: service_healthy
+        required: true
+      run-migrations:
+        condition: service_completed_successfully
+        required: true
+    ports:
+    - 0.0.0.0:4001:4001
+    networks:
+    - frontend
+    - server
+    - full-internet
+    - no-internet
+  background-process-runner:
+    build: *id002
+    user: node:${VIVARIA_DOCKER_GID:-999}
+    image: ghcr.io/metr/vivaria-server
+    volumes: *id003
+    environment: *id004
+    env_file: *id005
+    depends_on:
+      database:
+        condition: service_healthy
+        required: true
+      run-migrations:
+        condition: service_completed_successfully
+        required: true
+    command:
+    - --background-process-runner
+    networks:
+    - server
+  run-migrations:
+    build:
+      context: .
+      dockerfile: ./server.Dockerfile
+      target: run-migrations
+      args: *id001
+    user: node:${VIVARIA_DOCKER_GID:-999}
+    image: ghcr.io/metr/vivaria-database:migrations-latest
+    volumes: *id003
+    environment: *id004
+    env_file: *id005
+    depends_on:
+      database:
+        condition: service_healthy
+        required: true
+    command:
+    - migrate:latest
+    networks:
+    - server
+  ui:
+    build:
+      context: .
+      dockerfile: ./ui.Dockerfile
+      target: prod
+    image: ghcr.io/metr/vivaria-ui
+    environment:
+      VIVARIA_UI_HOSTNAME: ${VIVARIA_UI_HOSTNAME:-http://localhost:4000}
+      VIVARIA_API_URL: ${VIVARIA_API_URL:-http://server:4001}
+    volumes:
+    - caddy:/data
+    - ./Caddyfile:/etc/caddy/Caddyfile
+    ports:
+    - 0.0.0.0:4000:4000
+    networks:
+    - frontend
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:4000
+      interval: 1s
+      retries: 30
+  database:
+    build:
+      context: .
+      dockerfile: ./database.Dockerfile
+      target: base
+    image: ghcr.io/metr/vivaria-database
+    healthcheck:
+      test:
+      - CMD
+      - pg_isready
+      - -d
+      - vivaria
+      - -U
+      - vivaria
+      interval: 1s
+      retries: 30
+    ports:
+    - 5432:5432
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+    env_file:
+    - .env.db
+    networks:
+    - server
+volumes:
+  caddy: {}
+  pgdata: {}
+  tmp: {}
+networks:
+  frontend:
+    driver: bridge
+  server:
+    driver: bridge
+  full-internet:
+    driver: bridge
+  no-internet:
+    driver: bridge
+    internal: true
