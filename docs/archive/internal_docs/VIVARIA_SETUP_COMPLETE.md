@@ -117,7 +117,7 @@ alias viv-compose='sudo docker compose -f docker-compose.yml -f docker-compose.g
 - **Vivaria config**: `~/.config/viv-cli/config.json`
 - **Vivaria env files**: `/home/ubuntu/coding-agent/Coding-Agent-For-REBench/vivaria/.env.server` and `.env.db`
 - **Docker override**: `/home/ubuntu/coding-agent/Coding-Agent-For-REBench/vivaria/docker-compose.override.yml`
-- **Task secrets**: `/home/ubuntu/coding-agent/Coding-Agent-For-REBench/RE-Bench/secrets.env`
+- **Task secrets**: `/home/ubuntu/coding-agent/Coding-Agent-For-REBench/deltamlbench/secrets.env`
 
 ## API Endpoints
 
@@ -154,8 +154,8 @@ Or use viv directly:
 ```bash
 viv run \
     --agent-path modular-public \
-    --task-family-path RE-Bench/pwc_mnist_gatedgcn \
-    --env-file-path RE-Bench/secrets.env \
+    --task-family-path deltamlbench/pwc_mnist_gatedgcn \
+    --env-file-path deltamlbench/secrets.env \
     --max_tokens 10000000 \
     --max_actions 3000 \
     pwc_mnist_gatedgcn/main
@@ -246,8 +246,8 @@ If you get an error like: `You don't have permission to use model "claude-sonnet
 ## Next Steps
 
 1. Log out and log back in to enable docker commands without sudo
-2. Review the task documentation in `/home/ubuntu/coding-agent/Coding-Agent-For-REBench/RE-Bench/`
-3. Ensure secrets are configured in `RE-Bench/secrets.env` (API keys, tokens, etc.)
+2. Review the task documentation in `/home/ubuntu/coding-agent/Coding-Agent-For-REBench/deltamlbench/`
+3. Ensure secrets are configured in `deltamlbench/secrets.env` (API keys, tokens, etc.)
 4. Start running PWC tasks!
 
 ## GPU Support

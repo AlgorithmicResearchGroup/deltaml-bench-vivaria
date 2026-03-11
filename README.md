@@ -1,10 +1,10 @@
-# Coding-Agent-For-REBench
+# DeltaMLBench
 
-Public monorepo for running RE-Bench tasks on Vivaria, with multiple agent implementations and grading utilities.
+Public monorepo for running DeltaMLBench tasks on Vivaria, with multiple agent implementations and grading utilities.
 
 ## What is in this repo
 
-- `RE-Bench/`: Task families (`ai_rd_*`, `pwc_*`)
+- `deltamlbench/`: Task families (`ai_rd_*`, `pwc_*`)
 - `vivaria/`: Vivaria server/UI/CLI workspace
 - `arg_agent/`: ARG agent wrapper for Vivaria
 - `modular-public/`, `modular-public-claude/`, `modular-public-gpt4o/`: modular agent variants
@@ -25,7 +25,7 @@ Public monorepo for running RE-Bench tasks on Vivaria, with multiple agent imple
 
 ```bash
 git clone <repo-url>
-cd Coding-Agent-For-REBench
+cd deltaml-bench-public
 ```
 
 2. Prepare environment files.

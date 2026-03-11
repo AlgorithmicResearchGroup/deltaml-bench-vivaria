@@ -56,7 +56,7 @@ echo "VIVARIA_DOCKER_GID=999" >> .env.server
 Copy the RE-Bench Docker Compose override file:
 
 ```bash
-cp /path/to/RE-Bench/setup/docker-compose.override.yml /path/to/vivaria/
+cp /path/to/deltamlbench/setup/docker-compose.override.yml /path/to/vivaria/
 ```
 
 **What this provides:**
@@ -80,10 +80,10 @@ GEMINI_API_KEY=...
 
 ## Step 5: Create RE-Bench Secrets File
 
-Create `RE-Bench/secrets.env` with task-specific API keys:
+Create `deltamlbench/secrets.env` with task-specific API keys:
 
 ```bash
-# At /path/to/RE-Bench/secrets.env
+# At /path/to/deltamlbench/secrets.env
 AI_RD_RUST_CODECONTESTS_INFERENCE_OPENAI_API_KEY=sk-proj-...
 REPLICATE_API_TOKEN=...  # Optional, for some tasks
 ```
@@ -270,7 +270,7 @@ Run a test task from your laptop:
 ```bash
 viv run \
   --agent-path ./modular-public-claude \
-  --task-family-path ./RE-Bench/pwc_5_datasets_code_cl \
+  --task-family-path ./deltamlbench/pwc_5_datasets_code_cl \
   --max-tokens 10000000 \
   --max-actions 3000 \
   pwc_5_datasets_code_cl/main
@@ -501,7 +501,7 @@ viv config set evalsToken <ACCESS_TOKEN>
 
 1. Access the web UI and verify you can log in
 2. Run a simple test task to verify GPU access
-3. Configure any additional task-specific environment variables in `RE-Bench/secrets.env`
+3. Configure any additional task-specific environment variables in `deltamlbench/secrets.env`
 4. Review agent resource limits in `.env.server` if needed (default 1 CPU, 4GB RAM per agent)
 
 ## Notes

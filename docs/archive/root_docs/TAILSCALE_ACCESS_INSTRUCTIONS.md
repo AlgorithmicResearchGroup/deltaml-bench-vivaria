@@ -60,7 +60,7 @@ Once configured, you can run tasks from your laptop:
 # Example: Run a task
 viv run \
   --agent-path modular-public \
-  --task-family-path RE-Bench/pwc_cat2000_sum \
+  --task-family-path deltamlbench/pwc_cat2000_sum \
   --max_tokens 100000 \
   --max_actions 100 \
   pwc_cat2000_sum/main

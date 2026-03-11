@@ -902,7 +902,7 @@ def get_validation_error_response(validation_result: Dict[str, Any]) -> Dict[str
         validation_result: Result from validate_solution_integrity()
     
     Returns:
-        Dictionary in RE-Bench score format with error message
+        Dictionary in DeltaMLBench score format with error message
     """
     warning_level = validation_result.get('warning_level', 'UNKNOWN')
     

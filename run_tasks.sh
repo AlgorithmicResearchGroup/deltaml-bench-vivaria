@@ -1,6 +1,6 @@
 #!/bin/bash
-# Run Manager for RE-Bench Tasks
-# Smart manager for running and monitoring Vivaria jobs on RE-Bench tasks
+# Run Manager for DeltaMLBench Tasks
+# Smart manager for running and monitoring Vivaria jobs on DeltaMLBench tasks
 
 # Attempt to activate conda environment at the start
 if command -v conda &>/dev/null; then
@@ -14,7 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR"
 # Default agent path, can be overridden with --agent flag
 AGENT_PATH="$PROJECT_DIR/modular-public"
-REBENCH_DIR="$PROJECT_DIR/RE-Bench"
+DELTAMLBENCH_DIR="$PROJECT_DIR/deltamlbench"
 ENV_FILE="$PROJECT_DIR/.env"
 LOGS_DIR="$PROJECT_DIR/vivaria_logs"
 JOBS_DIR="$PROJECT_DIR/vivaria_jobs"
@@ -34,7 +34,7 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Available RE-Bench tasks
+# Available DeltaMLBench tasks
 AVAILABLE_TASKS=(
     # AI R&D Tasks
     "ai_rd_fix_embedding"
@@ -45,7 +45,7 @@ AVAILABLE_TASKS=(
     "ai_rd_small_scaling_law"
     "ai_rd_triton_cumsum"
     
-    # PWC Tasks (Papers with Code - converted to RE-Bench format)
+    # PWC Tasks (Papers with Code - converted to DeltaMLBench format)
     "pwc_5_datasets_code_cl"
     "pwc_astock_srl_factors"
     "pwc_btad_urd"
@@ -108,7 +108,7 @@ mkdir -p "$LOGS_DIR" "$JOBS_DIR"
 # Helper functions
 print_header() {
     echo -e "${BLUE}=========================================${NC}"
-    echo -e "${BLUE}    RE-Bench Run Manager${NC}"
+    echo -e "${BLUE}    DeltaMLBench Run Manager${NC}"
     echo -e "${BLUE}=========================================${NC}"
 }
 
@@ -126,8 +126,8 @@ validate_environment() {
         ((errors++))
     fi
     
-    if [[ ! -d "$REBENCH_DIR" ]]; then
-        echo -e "${RED}Error: RE-Bench directory not found: $REBENCH_DIR${NC}"
+    if [[ ! -d "$DELTAMLBENCH_DIR" ]]; then
+        echo -e "${RED}Error: deltamlbench directory not found: $DELTAMLBENCH_DIR${NC}"
         ((errors++))
     fi
     
@@ -147,7 +147,7 @@ validate_environment() {
 }
 
 print_task_list() {
-    echo -e "${CYAN}Available RE-Bench tasks:${NC}"
+    echo -e "${CYAN}Available DeltaMLBench tasks:${NC}"
     for i in "${!AVAILABLE_TASKS[@]}"; do
         local task="${AVAILABLE_TASKS[$i]}"
         local status=$(get_task_status "$task")
@@ -157,7 +157,7 @@ print_task_list() {
 
 get_task_description() {
     local task="$1"
-    local readme_file="$REBENCH_DIR/${task}/README.md"
+    local readme_file="$DELTAMLBENCH_DIR/${task}/README.md"
     if [[ -f "$readme_file" ]]; then
         # Extract first line of description from README
         head -5 "$readme_file" | grep -E "^[A-Z]" | head -1 | cut -c1-80 || echo "No description available"
@@ -232,7 +232,7 @@ start_single_task() {
         fi
     fi
     
-    local task_dir="$REBENCH_DIR/$task"
+    local task_dir="$DELTAMLBENCH_DIR/$task"
     
     echo -e "${GREEN}Starting Vivaria job for task: $task (run $run_number)${NC}"
     echo -e "${BLUE}Run name: $run_name${NC}"
@@ -327,7 +327,7 @@ start_task() {
     fi
     
     # Check if task directory exists
-    local task_dir="$REBENCH_DIR/$task"
+    local task_dir="$DELTAMLBENCH_DIR/$task"
     if [[ ! -d "$task_dir" ]]; then
         echo -e "${RED}Error: Task directory not found: $task_dir${NC}"
         return 1
@@ -387,7 +387,7 @@ start_task() {
 }
 
 start_all_tasks() {
-    echo -e "${YELLOW}Starting ALL RE-Bench tasks...${NC}"
+    echo -e "${YELLOW}Starting ALL DeltaMLBench tasks...${NC}"
     
     if ! validate_environment; then
         return 1
@@ -951,8 +951,8 @@ show_help() {
     echo -e "  ${GREEN}(default agent)${NC}         Use modular-public (default agent)"
     echo
     echo -e "${YELLOW}Job Management:${NC}"
-    echo -e "  ${GREEN}start <task> [name]${NC}    Start a specific RE-Bench task"
-    echo -e "  ${GREEN}start-all${NC}              Start all RE-Bench tasks"
+    echo -e "  ${GREEN}start <task> [name]${NC}    Start a specific DeltaMLBench task"
+    echo -e "  ${GREEN}start-all${NC}              Start all DeltaMLBench tasks"
     echo -e "  ${GREEN}start-all-pwc${NC}          Start all PWC tasks only"
     echo -e "  ${GREEN}start-all-ai-rd${NC}        Start all AI R&D tasks only"
     echo -e "  ${GREEN}kill <task>${NC}            Kill a specific task job"
@@ -1011,7 +1011,7 @@ show_help() {
     echo -e "  Agent path: ${CYAN}$AGENT_PATH${NC}"
     echo -e "  Run count: ${CYAN}$RUN_COUNT${NC}"
     echo -e "  Max runtime: ${CYAN}$MAX_TOTAL_SECONDS seconds ($(($MAX_TOTAL_SECONDS / 3600)) hours)${NC}"
-    echo -e "  RE-Bench path: ${CYAN}$REBENCH_DIR${NC}"
+    echo -e "  DeltaMLBench path: ${CYAN}$DELTAMLBENCH_DIR${NC}"
     echo -e "  Env file: ${CYAN}$ENV_FILE${NC}"
     echo -e "  Max tokens: ${CYAN}$MAX_TOKENS${NC}"
     echo -e "  Max actions: ${CYAN}$MAX_ACTIONS${NC}"

@@ -266,4 +266,4 @@ For issues or feature requests, please refer to the main project documentation o
 
 ## License
 
-This script is part of the Coding-Agent-For-REBench project and follows the same licensing terms.
+This script is part of the deltaml-bench-public project and follows the same licensing terms.

@@ -1,7 +1,7 @@
 # ARG Agent Vivaria Submission Flow Documentation
 
 ## Overview
-This document explains how the ARG Agent submits solutions to Vivaria for RE-Bench tasks.
+This document explains how the ARG Agent submits solutions to Vivaria for DeltaMLBench tasks.
 
 ## Submission Architecture
 

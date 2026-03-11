@@ -28,7 +28,7 @@ All code written, tested, and documented. Ready to apply to all 54 PWC tasks.
 | File | Change |
 |------|--------|
 | `anti_cheat_validation/__init__.py` | Added grader exports |
-| `RE-Bench/pwc_mnist_rkan/assets/score.py` | Example integration |
+| `deltamlbench/pwc_mnist_rkan/assets/score.py` | Example integration |
 
 ---
 
@@ -283,7 +283,7 @@ If issues occur:
 export ENABLE_LOG_GRADING="false"
 
 # Option 2: Revert all changes
-git checkout RE-Bench/pwc_*/assets/score.py
+git checkout deltamlbench/pwc_*/assets/score.py
 ```
 
 ---

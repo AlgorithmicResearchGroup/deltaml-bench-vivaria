@@ -263,7 +263,7 @@ COMMANDS:
 EXAMPLES:
     $0 list                  # List all submodules
     $0 clone all             # Clone all submodules
-    $0 init RE-Bench         # Initialize RE-Bench submodule
+    $0 init deltamlbench     # Initialize deltamlbench submodule
     $0 update all            # Update all submodules
     $0 status vivaria        # Check status of vivaria submodule
     $0 info all              # Show detailed info for all submodules

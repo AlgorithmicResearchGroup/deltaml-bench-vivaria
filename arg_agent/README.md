@@ -34,7 +34,7 @@ Original ARG Agent Components:
 ```bash
 viv run \
     --agent-path arg_agent \
-    --task-family-path RE-Bench/ai_rd_triton_cumsum \
+    --task-family-path deltamlbench/ai_rd_triton_cumsum \
     --env-file-path secrets.env \
     ai_rd_triton_cumsum/main
 ```
@@ -45,7 +45,7 @@ viv run \
     --agent-path arg_agent \
     --agent-settings-pack arg_reasoning \
     --max_tokens 5000000 \
-    --task-family-path RE-Bench/ai_rd_fix_embedding \
+    --task-family-path deltamlbench/ai_rd_fix_embedding \
     --env-file-path secrets.env \
     ai_rd_fix_embedding/main
 ```
@@ -132,7 +132,7 @@ The agent can be configured via settings packs in `manifest.json`:
 
 ## Compatibility
 
-- ✅ RE-Bench tasks
+- ✅ DeltaMLBench tasks
 - ✅ Vivaria platform
 - ✅ Multi-LLM providers
 - ✅ GPU tasks
