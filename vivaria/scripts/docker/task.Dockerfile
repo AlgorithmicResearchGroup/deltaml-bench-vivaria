@@ -66,10 +66,13 @@ EOF
 # Install Playwright, a browser automation library that METR's agents often use.
 # It's convenient for us to install it here for Docker caching reasons but is not
 # part of the Task Standard; feel free to omit it in your own setup.
+ARG INSTALL_PLAYWRIGHT=0
 ENV PLAYWRIGHT_BROWSERS_PATH=/usr/lib/playwright
 RUN --mount=type=cache,target=/root/.cache \
-    pip install playwright==1.46.0 \
- && playwright install --with-deps chromium
+    if [ "$INSTALL_PLAYWRIGHT" = "1" ]; then \
+        pip install playwright==1.46.0 \
+     && playwright install --with-deps chromium; \
+    fi
 
 RUN useradd -m -s /bin/bash -u 1000 agent
 # Add protected directory for intermediate_scoring logic (and possibly other use cases)

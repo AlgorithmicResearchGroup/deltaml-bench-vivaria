@@ -100,8 +100,8 @@ export class TaskSetupDatas {
           containerName: `${ti.containerName}-${Math.random().toString(36).slice(2)}`,
           user,
           workdir,
-          cpus: taskManifest?.resources?.cpus,
-          memoryGb: taskManifest?.resources?.memory_gb,
+          cpus: this.config.clampTaskCpuCount(host, taskManifest?.resources?.cpus),
+          memoryGb: this.config.clampTaskMemoryGb(host, taskManifest?.resources?.memory_gb),
           remove: true,
           aspawnOptions: { ...opts.aspawnOptions, timeout: this.config.TASK_OPERATION_TIMEOUT_MS },
         })
@@ -313,6 +313,7 @@ export async function makeTaskImageBuildSpec(
 ): Promise<ImageBuildSpec> {
   const buildArgs: Record<string, string> = {
     TASK_FAMILY_NAME: task.info.taskFamilyName,
+    INSTALL_PLAYWRIGHT: config.VIVARIA_TASK_INSTALL_PLAYWRIGHT ? '1' : '0',
   }
 
   const taskManifest = task.manifest?.tasks?.[task.info.taskName]

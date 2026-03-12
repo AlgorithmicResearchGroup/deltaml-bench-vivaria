@@ -19,7 +19,7 @@ x-backend:
     PGSSLMODE: disable
     PGHOST: database
     PGPORT: 5432
-    VIVARIA_MIDDLEMAN_TYPE: builtin
+    VIVARIA_MIDDLEMAN_TYPE: ${VIVARIA_MIDDLEMAN_TYPE:-builtin}
     OPENAI_API_URL: https://api.openai.com
     FULL_INTERNET_NETWORK_NAME: ${COMPOSE_PROJECT_NAME}_full-internet
     NO_INTERNET_NETWORK_NAME: ${COMPOSE_PROJECT_NAME}_no-internet

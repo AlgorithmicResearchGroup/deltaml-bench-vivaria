@@ -119,6 +119,10 @@ class RawConfig {
 
   /************ Tasks ***********/
   readonly TASK_BUILD_SSH_ARGUMENT = this.env.TASK_BUILD_SSH_ARGUMENT
+  readonly VIVARIA_TASK_INSTALL_PLAYWRIGHT = this.env.VIVARIA_TASK_INSTALL_PLAYWRIGHT === 'true'
+  readonly VIVARIA_RUN_INITIAL_SCORING = this.env.VIVARIA_RUN_INITIAL_SCORING !== 'false'
+  private readonly VIVARIA_LOCAL_TASK_MAX_CPU = this.env.VIVARIA_LOCAL_TASK_MAX_CPU
+  private readonly VIVARIA_LOCAL_TASK_MAX_MEMORY_GB = this.env.VIVARIA_LOCAL_TASK_MAX_MEMORY_GB
   private readonly TASK_ENVIRONMENT_STORAGE_GB = this.env.TASK_ENVIRONMENT_STORAGE_GB
   readonly TASK_OPERATION_TIMEOUT_MS =
     this.env.TASK_OPERATION_TIMEOUT_MINUTES != null
@@ -357,6 +361,20 @@ class RawConfig {
 
   diskGbRequest(host: Host): number {
     return floatOrNull(host instanceof K8sHost ? this.K8S_POD_DISK_GB_REQUEST : this.TASK_ENVIRONMENT_STORAGE_GB) ?? 4
+  }
+
+  clampTaskCpuCount(host: Host, requested: number | null | undefined): number | undefined {
+    if (requested == null || host instanceof K8sHost) return requested ?? undefined
+
+    const maxCpu = floatOrNull(this.VIVARIA_LOCAL_TASK_MAX_CPU)
+    return maxCpu == null ? requested : Math.min(requested, maxCpu)
+  }
+
+  clampTaskMemoryGb(host: Host, requested: number | null | undefined): number | undefined {
+    if (requested == null || host instanceof K8sHost) return requested ?? undefined
+
+    const maxMemoryGb = floatOrNull(this.VIVARIA_LOCAL_TASK_MAX_MEMORY_GB)
+    return maxMemoryGb == null ? requested : Math.min(requested, maxMemoryGb)
   }
 }
 

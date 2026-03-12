@@ -30,9 +30,9 @@
   {
     "type": "shell",
     "commands": [
-      "git clone https://huggingface.co/datasets/taoroalin/code_contests_slim_json /home/agent/data",
-      "mv /home/agent/data/test.jsonl /root/test.jsonl",
-      "rm -rf /home/agent/data/.git"
+      "mkdir -p /home/agent/data",
+      "curl -L --retry 5 --retry-delay 2 --fail https://huggingface.co/datasets/taoroalin/code_contests_slim_json/resolve/main/valid.jsonl -o /home/agent/data/valid.jsonl",
+      "curl -L --retry 5 --retry-delay 2 --fail https://huggingface.co/datasets/taoroalin/code_contests_slim_json/resolve/main/test.jsonl -o /root/test.jsonl"
     ]
   },
   {

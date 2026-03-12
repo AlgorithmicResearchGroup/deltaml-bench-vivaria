@@ -116,7 +116,8 @@ export function makeTaskInfo(
   const { taskFamilyName, taskName } = taskIdParts(taskId)
   const taskFamilyHash = hashTaskOrAgentSource(source)
   const dockerfileHash = hasher.hashFiles(taskDockerfilePath)
-  const suffix = idJoin(taskFamilyName, taskFamilyHash, dockerfileHash, machineName)
+  const playwrightVariant = config.VIVARIA_TASK_INSTALL_PLAYWRIGHT ? 'pw1' : 'pw0'
+  const suffix = idJoin(taskFamilyName, taskFamilyHash, dockerfileHash, playwrightVariant, machineName)
 
   const imageName =
     imageNameOverride ??

@@ -110,13 +110,12 @@ async function shutdownGracefully(db: DB) {
 export async function standaloneBackgroundProcessRunner(svc: Services) {
   const config = svc.get(Config)
   const db = svc.get(DB)
-  const git = svc.get(Git)
 
   config.setAwsEnvVars(process.env)
 
   process.on('SIGINT', () => void shutdownGracefully(db))
 
-  await Promise.all([async () => db.init(), git.getOrCreateTaskRepo(config.VIVARIA_DEFAULT_TASK_REPO_NAME)])
+  await db.init()
   await backgroundProcessRunner(svc)
 }
 

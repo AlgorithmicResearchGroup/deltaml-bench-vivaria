@@ -25,6 +25,31 @@ MAX_TOTAL_SECONDS="604800"
 # Default number of times to run a task, can be overridden with --times flag
 RUN_COUNT=1
 
+resolve_viv_cmd() {
+    if [[ -n "${VIV_CMD:-}" ]]; then
+        echo "$VIV_CMD"
+        return 0
+    fi
+
+    if [[ -x "$PROJECT_DIR/.venv-cli/bin/viv" ]]; then
+        echo "$PROJECT_DIR/.venv-cli/bin/viv"
+        return 0
+    fi
+
+    if command -v viv &>/dev/null; then
+        command -v viv
+        return 0
+    fi
+
+    return 1
+}
+
+if VIV_BIN="$(resolve_viv_cmd)"; then
+    :
+else
+    VIV_BIN=""
+fi
+
 # Colors for pretty output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -34,76 +59,27 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Available DeltaMLBench tasks
-AVAILABLE_TASKS=(
-    # AI R&D Tasks
-    "ai_rd_fix_embedding"
-    "ai_rd_nanogpt_chat_rl"
-    "ai_rd_optimize_llm_foundry"
-    "ai_rd_restricted_mlm"
-    "ai_rd_rust_codecontests_inference"
-    "ai_rd_small_scaling_law"
-    "ai_rd_triton_cumsum"
-    
-    # PWC Tasks (Papers with Code - converted to DeltaMLBench format)
-    "pwc_5_datasets_code_cl"
-    "pwc_astock_srl_factors"
-    "pwc_btad_urd"
-    "pwc_california_housing_binary_diffusion"
-    "pwc_cat2000_sum"
-    "pwc_chameleon_coed"
-    "pwc_cifar_100_pro_dsc"
-    "pwc_cifar_10_abnet_2g_r0"
-    "pwc_cifar_10_resnet18_fsgdm"
-    "pwc_clintox_bilstm"
-    "pwc_electricity_192_cyclenet"
-    "pwc_etth1_336_multivariate_softs"
-    "pwc_etth1_720_multivariate_sparsetsf"
-    "pwc_fashion_mnist_continued_fraction_of_straight_lines"
-    "pwc_fashion_mnist_energize"
-    "pwc_fashion_mnist_gecco"
-    "pwc_fb15k_237_dabr"
-    "pwc_fer2013_vgg_based"
-    "pwc_gowalla_rlae_dan"
-    "pwc_hme100k_ical"
-    "pwc_imagenet_10_dpac"
-    "pwc_istd_rasm"
-    "pwc_kvasir_seg_effisegnet_b5"
-    "pwc_kvasir_seg_emcad"
-    "pwc_kvasir_seg_yolo_sam_2"
-    "pwc_malnet_tiny_gatedgcn"
-    "pwc_mimic_iii_fld"
-    "pwc_mm_vet_flashsloth_hd"
-    "pwc_mnist_gatedgcn"
-    "pwc_office_31_euda"
-    "pwc_ogbg_molhiv_gatedgcn"
-    "pwc_ogbl_ddi_gcn_node_embedding"
-    "pwc_pdbbind_bapulm"
-    "pwc_pemsd4_pm_dmnet_r"
-    "pwc_peptides_struct_gcn"
-    "pwc_stanford_cars_prometar"
-    "pwc_summe_csta"
-    "pwc_tiny_imagenet_pro_dsc"
-    "pwc_traffic_glinear"
-    "pwc_training_and_validation_dataset_of_capsule_vision_2024_challenge_biomedclip_pubmedbert"
-    "pwc_txl_pbc_a_freely_accessible_labeled_peripheral_blood_cell_dataset_yolov5n"
-    "pwc_ucr_anomaly_archive_kan"
-    "pwc_weather_192_xpatch"
-    "pwc_wigesture_csi_bert"
-    "pwc_york_urban_dataset_dt_lsd"
-    "pwc_zju_rgb_p_csfnet_2"
-    "pwc_cnn"
-    "pwc_digital_twin_supported_deep_learning_for_fault_diagnosis_dann"
-    "pwc_etth1_336_multivariate_amd"
-    "pwc_food_101_mano_tiny"
-    "pwc_mnist_rkan"
-    "pwc_stl_10_40_labels_semioccam"
-    "pwc_tiny_imagenet_classification_mano_tiny"
-    "pwc_zinc_neuralwalker"
-)
+AVAILABLE_TASKS=()
+
+load_available_tasks() {
+    if [[ ! -d "$DELTAMLBENCH_DIR" ]]; then
+        AVAILABLE_TASKS=()
+        return
+    fi
+
+    AVAILABLE_TASKS=()
+    while IFS= read -r task; do
+        AVAILABLE_TASKS+=("$task")
+    done < <(
+        find "$DELTAMLBENCH_DIR" -mindepth 2 -maxdepth 2 -name manifest.yaml -print \
+            | sed -E 's#.*/([^/]+)/manifest.yaml#\1#' \
+            | sort
+    )
+}
 
 # Create required directories
 mkdir -p "$LOGS_DIR" "$JOBS_DIR"
+load_available_tasks
 
 # Helper functions
 print_header() {
@@ -132,14 +108,18 @@ validate_environment() {
     fi
     
     if [[ ! -f "$ENV_FILE" ]]; then
-        echo -e "${RED}Error: Environment file not found: $ENV_FILE${NC}"
-        echo -e "${YELLOW}Note: Create a repo-local .env file or pass env vars directly to Vivaria.${NC}"
-        ((errors++))
+        cat > "$ENV_FILE" <<'EOF'
+# Optional task-specific environment variables for DeltaMLBench task environments.
+# Replace placeholders with real values when a task needs them.
+AI_RD_RUST_CODECONTESTS_INFERENCE_OPENAI_API_KEY=smoke-test-placeholder
+EOF
+        echo -e "${YELLOW}Created default task env file: $ENV_FILE${NC}"
     fi
     
     # Check if viv command is available
-    if ! command -v viv &> /dev/null; then
-        echo -e "${RED}Error: 'viv' command not found. Please ensure Vivaria CLI is installed and in PATH${NC}"
+    if [[ -z "$VIV_BIN" ]]; then
+        echo -e "${RED}Error: Vivaria CLI not found.${NC}"
+        echo -e "${YELLOW}Run ./scripts/bootstrap_local.sh to install a repo-local CLI.${NC}"
         ((errors++))
     fi
     
@@ -189,27 +169,15 @@ get_task_status() {
 
 get_vivaria_run_status() {
     local run_id="$1"
-    # Try multiple methods to get run status
-    
-    # Method 1: Try viv status if available  
-    if command -v viv &> /dev/null; then
-        # Try getting status for the specific run
-        local status_output=$(viv status "$run_id" 2>/dev/null || echo "")
+
+    if [[ -n "$VIV_BIN" ]]; then
+        local status_output=$("$VIV_BIN" get_run_status "$run_id" 2>/dev/null || echo "")
         if [[ -n "$status_output" ]]; then
-            # Extract status from the output
-            echo "$status_output" | grep -oE "(running|submitted|killed|error|queued|setting-up|paused)" | head -1 || echo "unknown"
-            return
-        fi
-        
-        # Fallback: try listing all runs and find this one
-        local list_output=$(viv runs 2>/dev/null | grep -E "^.*$run_id" | head -1 || echo "")
-        if [[ -n "$list_output" ]]; then
-            echo "$list_output" | grep -oE "(running|submitted|killed|error|queued|setting-up|paused)" | head -1 || echo "unknown"
+            echo "$status_output" | grep -oE '"runStatus": ?"[^"]+"' | head -1 | cut -d'"' -f4 || echo "unknown"
             return
         fi
     fi
-    
-    # Method 2: Default fallback - assume running if job file exists and wasn't cleaned up
+
     echo "unknown"
 }
 
@@ -237,7 +205,7 @@ start_single_task() {
     echo -e "${GREEN}Starting Vivaria job for task: $task (run $run_number)${NC}"
     echo -e "${BLUE}Run name: $run_name${NC}"
     echo -e "${PURPLE}Description: $(get_task_description "$task")${NC}"
-    echo -e "${CYAN}Command: viv run --agent-path $AGENT_PATH --task-family-path $task_dir --env-file-path $ENV_FILE --max_tokens $MAX_TOKENS --max_actions $MAX_ACTIONS --max_total_seconds $MAX_TOTAL_SECONDS --intervention True ${task}/main${NC}"
+    echo -e "${CYAN}Command: $VIV_BIN run --agent-path $AGENT_PATH --task-family-path $task_dir --env-file-path $ENV_FILE --max_tokens $MAX_TOKENS --max_actions $MAX_ACTIONS --max_total_seconds $MAX_TOTAL_SECONDS --intervention True ${task}/main${NC}"
     echo
     
     # Create log file with run number for multiple runs
@@ -253,12 +221,12 @@ start_single_task() {
     echo "Starting Vivaria job at $(date)" > "$log_file"
     echo "Task: $task" >> "$log_file"
     echo "Run name: $run_name" >> "$log_file"
-    echo "Command: viv run --agent-path $AGENT_PATH --task-family-path $task_dir --env-file-path $ENV_FILE --max_tokens $MAX_TOKENS --max_actions $MAX_ACTIONS --max_total_seconds $MAX_TOTAL_SECONDS --intervention True ${task}/main" >> "$log_file"
+    echo "Command: $VIV_BIN run --agent-path $AGENT_PATH --task-family-path $task_dir --env-file-path $ENV_FILE --max_tokens $MAX_TOKENS --max_actions $MAX_ACTIONS --max_total_seconds $MAX_TOTAL_SECONDS --intervention True ${task}/main" >> "$log_file"
     echo "========================================" >> "$log_file"
     
     # Run the command and capture output
     local output
-    if output=$(viv run \
+    if output=$("$VIV_BIN" run \
         --agent-path "$AGENT_PATH" \
         --task-family-path "$task_dir" \
         --env-file-path "$ENV_FILE" \
@@ -376,7 +344,7 @@ start_task() {
                 local job_file="$JOBS_DIR/${task}_run${i}.job"
                 if [[ -f "$job_file" ]]; then
                     local run_id=$(cat "$job_file")
-                    echo -e "  Run $i (ID: $run_id): ${CYAN}viv status $run_id${NC}"
+                    echo -e "  Run $i (ID: $run_id): ${CYAN}$VIV_BIN status $run_id${NC}"
                 fi
             done
         fi
@@ -628,7 +596,7 @@ kill_task() {
     echo -e "${YELLOW}Killing Vivaria job for task: $task (Run #$run_id)${NC}"
     
     # Kill the Vivaria run (adjust command based on actual viv CLI)
-    if viv kill "$run_id" 2>/dev/null; then
+    if "$VIV_BIN" kill "$run_id" 2>/dev/null; then
         echo -e "${GREEN}✓ Job killed successfully${NC}"
         # Remove job file
         rm -f "$job_file"
@@ -646,7 +614,7 @@ kill_all_jobs() {
         if [[ -f "$job_file" ]]; then
             local run_id=$(cat "$job_file")
             echo -e "Killing $task (Run #$run_id)..."
-            if viv kill "$run_id" 2>/dev/null; then
+            if "$VIV_BIN" kill "$run_id" 2>/dev/null; then
                 echo -e "${GREEN}✓ Killed $task${NC}"
                 rm -f "$job_file"
                 ((killed++))
@@ -791,10 +759,11 @@ check_vivaria_services_status() {
     
     # Check if viv command is accessible
     echo
-    if command -v viv &> /dev/null; then
-        echo -e "${GREEN}✓ viv command is available${NC}"
+    if [[ -n "$VIV_BIN" ]]; then
+        echo -e "${GREEN}✓ Vivaria CLI is available${NC}"
+        echo -e "  Using: ${CYAN}$VIV_BIN${NC}"
     else
-        echo -e "${RED}✗ viv command not found (activate reb conda environment)${NC}"
+        echo -e "${RED}✗ Vivaria CLI not found${NC}"
     fi
 }
 
@@ -981,26 +950,26 @@ show_help() {
     echo
     echo -e "${CYAN}Examples:${NC}"
     echo -e "  ${YELLOW}Default Agent (modular-public):${NC}"
-    echo -e "    $0 start ai_rd_triton_cumsum"
-    echo -e "    $0 status ai_rd_triton_cumsum"
+    echo -e "    $0 start ai_rd_rust_codecontests_inference"
+    echo -e "    $0 status ai_rd_rust_codecontests_inference"
     echo -e "  ${YELLOW}Custom Agent:${NC}"
-    echo -e "    $0 --agent ./arg_agent start ai_rd_triton_cumsum"
-    echo -e "    $0 --agent ./arg_agent start ai_rd_fix_embedding my_custom_run"
-    echo -e "    $0 --agent /path/to/my/agent status ai_rd_triton_cumsum"
+    echo -e "    $0 --agent ./arg_agent start ai_rd_rust_codecontests_inference"
+    echo -e "    $0 --agent ./smoke-agent start ai_rd_rust_codecontests_inference"
+    echo -e "    $0 --agent /path/to/my/agent status ai_rd_rust_codecontests_inference"
     echo -e "    $0 --agent ./arg_agent start-all"
     echo -e "  ${YELLOW}Start All Tasks by Type:${NC}"
     echo -e "    $0 start-all-pwc                                      # Start all PWC tasks only"
     echo -e "    $0 start-all-ai-rd                                    # Start all AI R&D tasks only"
     echo -e "    $0 --agent ./arg_agent start-all-pwc                  # Start all PWC tasks with custom agent"
     echo -e "  ${YELLOW}Multiple Runs:${NC}"
-    echo -e "    $0 --times 3 start ai_rd_triton_cumsum"
-    echo -e "    $0 --agent ./arg_agent --times 5 start ai_rd_fix_embedding"
+    echo -e "    $0 --times 3 start ai_rd_rust_codecontests_inference"
+    echo -e "    $0 --agent ./arg_agent --times 5 start ai_rd_rust_codecontests_inference"
     echo -e "    $0 --times 10 --agent ./arg_agent start ai_rd_nanogpt_chat_rl batch_run"
     echo -e "  ${YELLOW}Time Limits (Auto-Kill):${NC}"
-    echo -e "    $0 --timeout 3600 start ai_rd_triton_cumsum          # Kill after 1 hour"
-    echo -e "    $0 --timeout 1800 start ai_rd_fix_embedding          # Kill after 30 minutes"
+    echo -e "    $0 --timeout 3600 start ai_rd_rust_codecontests_inference   # Kill after 1 hour"
+    echo -e "    $0 --timeout 1800 start ai_rd_rust_codecontests_inference   # Kill after 30 minutes"
     echo -e "    $0 --agent ./arg_agent --timeout 7200 start pwc_mnist_gatedgcn  # Kill after 2 hours"
-    echo -e "    $0 --times 3 --timeout 3600 start ai_rd_triton_cumsum  # 3 runs, each 1 hour max"
+    echo -e "    $0 --times 3 --timeout 3600 start ai_rd_rust_codecontests_inference  # 3 runs, each 1 hour max"
     echo -e "  ${YELLOW}Vivaria Services:${NC}"
     echo -e "    $0 vivaria-status"
     echo -e "    $0 restart-vivaria"

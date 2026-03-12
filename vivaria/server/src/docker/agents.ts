@@ -203,10 +203,10 @@ export class ContainerRunner {
     }
 
     if (A.cpus != null) {
-      opts.cpus = A.cpus
+      opts.cpus = this.config.clampTaskCpuCount(this.host, A.cpus)
     }
     if (A.memoryGb != null) {
-      opts.memoryGb = A.memoryGb
+      opts.memoryGb = this.config.clampTaskMemoryGb(this.host, A.memoryGb)
     }
     // Use -1 to indicate that the host does not support setting a storage limit.
     const hostDiskGb = this.config.diskGbRequest(this.host)
@@ -311,7 +311,9 @@ export class AgentContainerRunner extends ContainerRunner {
       agentBranchNumber,
       agentSettings,
       agentStartingState,
-      runScoring: taskSetupData.intermediateScoring ? opts.runScoring ?? true : false,
+      runScoring: taskSetupData.intermediateScoring
+        ? opts.runScoring ?? this.config.VIVARIA_RUN_INITIAL_SCORING
+        : false,
       updateStartedAt: !opts.resume,
       skipReplay: true, // Keep the agent from re-executing old actions, which can be slow
     })
@@ -424,7 +426,7 @@ export class AgentContainerRunner extends ContainerRunner {
       agentBranchNumber: TRUNK,
       agentSettings,
       agentStartingState,
-      runScoring: taskSetupData.intermediateScoring,
+      runScoring: taskSetupData.intermediateScoring && this.config.VIVARIA_RUN_INITIAL_SCORING,
     })
 
     await this.markState(SetupState.Enum.COMPLETE)

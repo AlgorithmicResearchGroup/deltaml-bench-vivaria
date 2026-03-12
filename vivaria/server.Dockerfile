@@ -92,8 +92,10 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
 FROM ${VIVARIA_SERVER_DEVICE_TYPE} AS base
 ARG DOCKER_GID=999
-# Ensure docker group has the correct GID, relocating any conflicting groups
-RUN if [ "$(getent group docker | cut -d: -f3)" != "${DOCKER_GID}" ]; then \
+# Ensure docker group has the correct GID, relocating any conflicting groups.
+# Docker Desktop can expose the socket as gid 0 inside containers, which we
+# cannot safely remap here because gid 0 is reserved for root.
+RUN if [ "${DOCKER_GID}" != "0" ] && [ "$(getent group docker | cut -d: -f3)" != "${DOCKER_GID}" ]; then \
     conflicting_group=$(getent group ${DOCKER_GID} | cut -d: -f1 || true); \
     if [ -n "$conflicting_group" ]; then \
         # Find next available GID starting from 60000 (typically unused range) \
@@ -163,6 +165,7 @@ FROM base AS server
 COPY --from=deps-prod /app/node_modules /app/node_modules
 COPY --from=deps-prod /app/server/node_modules /app/server/node_modules
 COPY --from=build /app/server/build /app/server/build
+COPY pyhooks /app/pyhooks
 COPY python-package /app/python-package
 COPY scripts ./scripts
 
