@@ -41,7 +41,7 @@ Example: MAE = 0.410 → Score = (0.452 - 0.410) / 0.452 * 100 = 9.29%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_etth1_336_multivariate_softs
+./run_benchmark.sh run pwc_etth1_336_multivariate_softs_main
 ```
 
 

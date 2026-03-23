@@ -56,7 +56,7 @@ If you achieve: Dice=0.96, mIoU=0.92, F-measure=0.96, Precision=0.98, Recall=0.9
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_kvasir_seg_effisegnet_b5
+./run_benchmark.sh run pwc_kvasir_seg_effisegnet_b5_main
 ```
 
 

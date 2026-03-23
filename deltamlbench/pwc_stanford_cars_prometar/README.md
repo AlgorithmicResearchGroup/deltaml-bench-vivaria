@@ -27,7 +27,7 @@ The task is evaluated based on Harmonic mean improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_stanford_cars_prometar
+./run_benchmark.sh run pwc_stanford_cars_prometar_main
 ```
 
 

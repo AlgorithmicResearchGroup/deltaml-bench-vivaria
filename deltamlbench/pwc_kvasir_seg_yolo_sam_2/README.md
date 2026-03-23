@@ -47,7 +47,7 @@ If you achieve: F1=92.0, Dice=0.88, mIoU=0.78
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_kvasir_seg_yolo_sam_2
+./run_benchmark.sh run pwc_kvasir_seg_yolo_sam_2_main
 ```
 
 

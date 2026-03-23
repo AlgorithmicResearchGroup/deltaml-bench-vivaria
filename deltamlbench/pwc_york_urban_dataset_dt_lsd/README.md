@@ -27,7 +27,7 @@ The task is evaluated based on sAP10 improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_york_urban_dataset_dt_lsd
+./run_benchmark.sh run pwc_york_urban_dataset_dt_lsd_main
 ```
 
 

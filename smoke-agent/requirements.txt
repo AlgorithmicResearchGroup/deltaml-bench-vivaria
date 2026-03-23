@@ -1,1 +1,0 @@
-git+https://github.com/METR/pyhooks.git@5520b166d02d9833ab393bb186b576c0f688954b

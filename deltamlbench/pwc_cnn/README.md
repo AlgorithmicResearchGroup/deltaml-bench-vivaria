@@ -21,7 +21,7 @@ This task challenges agents to improve the SigExt (Salient Information Extractio
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_cnn
+./run_benchmark.sh run pwc_cnn_main
 ```
 
 

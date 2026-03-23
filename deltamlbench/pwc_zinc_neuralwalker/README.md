@@ -59,7 +59,7 @@ Score = (baseline_mae - your_mae) / baseline_mae × 100
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_zinc_neuralwalker
+./run_benchmark.sh run pwc_zinc_neuralwalker_main
 ```
 
 

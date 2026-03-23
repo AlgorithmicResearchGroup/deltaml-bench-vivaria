@@ -63,7 +63,7 @@ class State(BaseModel):
     last_node_id: int = -1
     last_rating_options: Optional[List[RatingOption]] = None
     next_step: Dict = Field(default_factory=dict)
-    token_limit: int = 10000000  # 10 million tokens (matches run_tasks.sh)
+    token_limit: int = 10000000
     token_usage: int = 0
     time_limit: int = 120 * 60  # 2 hours for O1 reasoning
     time_usage: int = 0

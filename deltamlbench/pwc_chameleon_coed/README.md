@@ -35,7 +35,7 @@ Score = (new_accuracy - baseline_accuracy) / baseline_accuracy * 100
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_chameleon_coed
+./run_benchmark.sh run pwc_chameleon_coed_main
 ```
 
 

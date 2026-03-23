@@ -28,7 +28,7 @@ Higher Hit@20 is better.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_ogbl_ddi_gcn_node_embedding
+./run_benchmark.sh run pwc_ogbl_ddi_gcn_node_embedding_main
 ```
 
 

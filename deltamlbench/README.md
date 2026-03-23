@@ -30,5 +30,5 @@ Use the repo root workflow:
 ```bash
 ./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh list
-./run_benchmark.sh run pwc_cnn_main anthropic/claude-sonnet-4-5
+./run_benchmark.sh run pwc_cnn_main anthropic/claude-sonnet-4-6
 ```

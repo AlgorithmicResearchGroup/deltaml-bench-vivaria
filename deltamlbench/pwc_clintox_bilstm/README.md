@@ -38,7 +38,7 @@ Example: AUC = 0.98 → Score = (0.98 - 0.97) / 0.97 * 100 = 1.03%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_clintox_bilstm
+./run_benchmark.sh run pwc_clintox_bilstm_main
 ```
 
 

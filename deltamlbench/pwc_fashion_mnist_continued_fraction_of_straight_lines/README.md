@@ -42,7 +42,7 @@ Example: Accuracy = 87.50% → Score = (87.50 - 84.12) / 84.12 * 100 = 4.02%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_fashion_mnist_continued_fraction_of_straight_lines
+./run_benchmark.sh run pwc_fashion_mnist_continued_fraction_of_straight_lines_main
 ```
 
 

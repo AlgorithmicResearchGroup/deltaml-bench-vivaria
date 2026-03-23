@@ -60,7 +60,7 @@ summe_csta/
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_summe_csta
+./run_benchmark.sh run pwc_summe_csta_main
 ```
 
 

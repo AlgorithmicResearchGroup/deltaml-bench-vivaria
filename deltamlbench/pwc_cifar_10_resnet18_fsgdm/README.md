@@ -33,7 +33,7 @@ Example: Accuracy = 96.0% → Score = (96.0 - 95.66) / 95.66 * 100 = 0.36%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_cifar_10_resnet18_fsgdm
+./run_benchmark.sh run pwc_cifar_10_resnet18_fsgdm_main
 ```
 
 

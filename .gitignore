@@ -60,6 +60,7 @@ Thumbs.db
 # Logs
 *.log
 logs/
+.inspect-logs*/
 
 # Temporary files
 tmp/

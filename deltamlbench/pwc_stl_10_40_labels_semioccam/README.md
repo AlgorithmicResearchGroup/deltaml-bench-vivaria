@@ -259,7 +259,7 @@ def consistency_loss(model, images, alpha=1.0):
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_stl_10_40_labels_semioccam
+./run_benchmark.sh run pwc_stl_10_40_labels_semioccam_main
 ```
 
 

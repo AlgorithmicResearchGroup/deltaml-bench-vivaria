@@ -27,7 +27,7 @@ The task is evaluated based on F1 Score improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_zju_rgb_p_csfnet_2
+./run_benchmark.sh run pwc_zju_rgb_p_csfnet_2_main
 ```
 
 

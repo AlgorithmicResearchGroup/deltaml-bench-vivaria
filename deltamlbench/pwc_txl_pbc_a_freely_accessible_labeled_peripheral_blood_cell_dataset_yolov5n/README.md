@@ -27,7 +27,7 @@ The task is evaluated based on mAP50 improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_txl_pbc_a_freely_accessible_labeled_peripheral_blood_cell_dataset_yolov5n
+./run_benchmark.sh run pwc_txl_pbc_a_freely_accessible_labeled_peripheral_blood_cell_dataset_yolov5n_main
 ```
 
 

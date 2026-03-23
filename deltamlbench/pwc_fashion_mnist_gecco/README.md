@@ -41,7 +41,7 @@ Example: Accuracy = 89.00% → Score = (89.00 - 88.09) / 88.09 * 100 = 1.03%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_fashion_mnist_gecco
+./run_benchmark.sh run pwc_fashion_mnist_gecco_main
 ```
 
 

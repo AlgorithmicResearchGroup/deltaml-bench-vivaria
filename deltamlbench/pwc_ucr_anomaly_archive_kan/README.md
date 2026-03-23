@@ -27,7 +27,7 @@ The task is evaluated based on AUC ROC  improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_ucr_anomaly_archive_kan
+./run_benchmark.sh run pwc_ucr_anomaly_archive_kan_main
 ```
 
 

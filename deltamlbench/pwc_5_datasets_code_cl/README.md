@@ -106,7 +106,7 @@ Returns 0 if new_avg_acc ≤ baseline_avg_acc.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_5_datasets_code_cl
+./run_benchmark.sh run pwc_5_datasets_code_cl_main
 ```
 
 

@@ -27,7 +27,7 @@ The task is evaluated based on Total Accuracy improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_training_and_validation_dataset_of_capsule_vision_2024_challenge_biomedclip_pubmedbert
+./run_benchmark.sh run pwc_training_and_validation_dataset_of_capsule_vision_2024_challenge_biomedclip_pubmedbert_main
 ```
 
 

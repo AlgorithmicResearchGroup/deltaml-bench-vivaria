@@ -40,7 +40,7 @@ Example: MSE = 0.380 → Score = (0.426 - 0.380) / 0.426 * 100 = 10.80%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_etth1_720_multivariate_sparsetsf
+./run_benchmark.sh run pwc_etth1_720_multivariate_sparsetsf_main
 ```
 
 

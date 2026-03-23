@@ -39,7 +39,7 @@ The agent's solution must improve upon these baseline metrics:
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_california_housing_binary_diffusion
+./run_benchmark.sh run pwc_california_housing_binary_diffusion_main
 ```
 
 

@@ -43,7 +43,7 @@ Returns 0 if new_accuracy ≤ baseline_accuracy.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_astock_srl_factors
+./run_benchmark.sh run pwc_astock_srl_factors_main
 ```
 
 

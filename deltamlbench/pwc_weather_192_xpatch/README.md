@@ -27,7 +27,7 @@ The task is evaluated based on MAE improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_weather_192_xpatch
+./run_benchmark.sh run pwc_weather_192_xpatch_main
 ```
 
 

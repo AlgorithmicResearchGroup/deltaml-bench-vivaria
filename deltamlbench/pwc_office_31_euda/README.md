@@ -27,7 +27,7 @@ The task is evaluated based on Accuracy improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_office_31_euda
+./run_benchmark.sh run pwc_office_31_euda_main
 ```
 
 

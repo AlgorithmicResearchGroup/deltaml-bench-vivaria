@@ -25,7 +25,7 @@ This task challenges agents to improve the rKAN (Rational Kolmogorov-Arnold Netw
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_mnist_rkan
+./run_benchmark.sh run pwc_mnist_rkan_main
 ```
 
 

@@ -43,7 +43,7 @@ Example: Accuracy = 0.787 (78.7%) → Score = (0.787 - 0.773) / 0.773 * 100 = 1.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_cifar_100_pro_dsc
+./run_benchmark.sh run pwc_cifar_100_pro_dsc_main
 ```
 
 

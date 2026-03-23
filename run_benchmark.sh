@@ -20,13 +20,13 @@ usage() {
   cat <<EOF
 Usage:
   ./run_benchmark.sh list
-  ./run_benchmark.sh smoke [model]
+  ./run_benchmark.sh smoke
   ./run_benchmark.sh run <task_name> [model] [solver]
 
 Examples:
   ./run_benchmark.sh list
-  ./run_benchmark.sh smoke anthropic/claude-sonnet-4-5
-  ./run_benchmark.sh run pwc_cnn_main openai/gpt-4.1-mini $ROOT_DIR/deltamlbench_inspect/solvers.py@modular_public_solver
+  ./run_benchmark.sh smoke
+  ./run_benchmark.sh run pwc_cnn_main anthropic/claude-sonnet-4-6
 EOF
 }
 
@@ -36,7 +36,6 @@ case "$cmd" in
     "$INSPECT_BIN" list tasks "$TASK_FILE"
     ;;
   smoke)
-    model="${2:-$DEFAULT_MODEL}"
     "$INSPECT_BIN" eval "$TASK_FILE@pwc_cnn_main" --solver "$ROOT_DIR/deltamlbench_inspect/solvers.py@baseline_submit" --limit 1 --no-sandbox-cleanup
     ;;
   run)

@@ -45,7 +45,7 @@ Score = (your_accuracy - 87.52) / 87.52 × 100
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_tiny_imagenet_classification_mano_tiny
+./run_benchmark.sh run pwc_tiny_imagenet_classification_mano_tiny_main
 ```
 
 

@@ -29,7 +29,7 @@ Higher ROC-AUC is better.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_ogbg_molhiv_gatedgcn
+./run_benchmark.sh run pwc_ogbg_molhiv_gatedgcn_main
 ```
 
 

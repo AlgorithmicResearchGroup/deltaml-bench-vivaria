@@ -54,7 +54,7 @@ Only improvements over baseline receive a positive score. If your Recall@20 ≤ 
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_gowalla_rlae_dan
+./run_benchmark.sh run pwc_gowalla_rlae_dan_main
 ```
 
 

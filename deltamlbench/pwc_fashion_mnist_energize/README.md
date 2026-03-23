@@ -42,7 +42,7 @@ Example: Accuracy = 0.930 (93.0%) → Score = (0.930 - 0.902) / 0.902 * 100 = 3.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_fashion_mnist_energize
+./run_benchmark.sh run pwc_fashion_mnist_energize_main
 ```
 
 

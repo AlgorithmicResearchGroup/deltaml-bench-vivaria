@@ -40,7 +40,7 @@ Example: AUC = 0.90 → Score = (0.90 - 0.888) / 0.888 * 100 = 1.35%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_cat2000_sum
+./run_benchmark.sh run pwc_cat2000_sum_main
 ```
 
 

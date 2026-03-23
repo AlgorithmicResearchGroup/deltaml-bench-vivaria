@@ -27,7 +27,7 @@ The task is evaluated based on MSE improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_mimic_iii_fld
+./run_benchmark.sh run pwc_mimic_iii_fld_main
 ```
 
 

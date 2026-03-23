@@ -44,7 +44,7 @@ Example: Accuracy = 70.00% → Score = (70.00 - 66.13) / 66.13 * 100 = 5.85%
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_fer2013_vgg_based
+./run_benchmark.sh run pwc_fer2013_vgg_based_main
 ```
 
 

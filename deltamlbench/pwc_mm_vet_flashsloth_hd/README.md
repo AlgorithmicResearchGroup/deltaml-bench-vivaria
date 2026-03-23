@@ -28,7 +28,7 @@ The task is evaluated based on GPT-4 score improvement over baseline.
 cd /path/to/deltaml-bench-public
 
 # Run the task using the manager script
-./run_tasks.sh start pwc_mm_vet_flashsloth_hd
+./run_benchmark.sh run pwc_mm_vet_flashsloth_hd_main
 ```
 
 

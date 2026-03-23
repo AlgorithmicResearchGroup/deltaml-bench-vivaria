@@ -42,14 +42,14 @@ BASELINE_METRICS = {
 
 def check_for_anticheat_warnings_in_trace(run_id: int) -> tuple[bool, str]:
     """
-    Check if there are any CRITICAL anti-cheat warnings in the Vivaria trace.
+    Check if there are any CRITICAL anti-cheat warnings in the trace store.
     Returns: (has_critical_warnings, warning_message)
     """
     try:
-        # Connect to Vivaria database (same connection as grade_run.py)
+        # Connect to the local Postgres trace database if configured.
         db_url = os.environ.get(
             'DB_READONLY_URL',
-            os.environ.get('DB_URL', 'postgresql://postgres:postgres@localhost:5432/vivaria')
+            os.environ.get('DB_URL', 'postgresql://postgres:postgres@localhost:5432/postgres')
         )
         
         conn = psycopg2.connect(db_url)
