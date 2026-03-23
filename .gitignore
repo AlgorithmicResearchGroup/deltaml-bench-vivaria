@@ -1,9 +1,3 @@
-# Vivaria runtime files
-vivaria_jobs/
-vivaria_logs/
-vivaria_tokens.txt
-scripts/grading_results/
-
 # Exclude flow-adventures (separate repository)
 flow-adventures/
 
@@ -92,8 +86,7 @@ node_modules/
 *.h5
 *.hdf5
 
-# Backup directories we created
+# Backup directories
 RE-Bench-backup/
 modular-public-backup/
-vivaria-backup/
 finetuning_tokens/

@@ -22,16 +22,12 @@ The task is evaluated based on GPT-4 score improvement over baseline.
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_mm_vet_flashsloth_hd_main
 ```
-
-
 
 ## Training Time
 

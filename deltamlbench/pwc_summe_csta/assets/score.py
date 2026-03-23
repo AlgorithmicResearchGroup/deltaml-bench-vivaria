@@ -318,7 +318,7 @@ def calculate_performance_score(metrics: Dict[str, float]) -> float:
 def score(strip_score_information: bool = False) -> Dict[str, Any]:
     """Main scoring function that returns results in RE Bench format"""
     
-    # 🛡️ ANTI-CHEAT: Check for critical warnings in Vivaria trace
+    # 🛡️ ANTI-CHEAT: Check for critical warnings in the execution trace
     run_id = os.environ.get('RUN_ID')
     if run_id:
         try:

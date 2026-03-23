@@ -41,16 +41,12 @@ If you achieve: F1=92.0, Dice=0.88, mIoU=0.78
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_kvasir_seg_yolo_sam_2_main
 ```
-
-
 
 ## Training Time
 

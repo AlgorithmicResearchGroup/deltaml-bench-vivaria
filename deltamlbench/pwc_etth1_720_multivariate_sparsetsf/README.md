@@ -34,16 +34,12 @@ Example: MSE = 0.380 → Score = (0.426 - 0.380) / 0.426 * 100 = 10.80%
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_etth1_720_multivariate_sparsetsf_main
 ```
-
-
 
 ## Training Time
 

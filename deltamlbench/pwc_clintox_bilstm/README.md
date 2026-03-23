@@ -32,16 +32,12 @@ Example: AUC = 0.98 → Score = (0.98 - 0.97) / 0.97 * 100 = 1.03%
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_clintox_bilstm_main
 ```
-
-
 
 ## Training Time
 

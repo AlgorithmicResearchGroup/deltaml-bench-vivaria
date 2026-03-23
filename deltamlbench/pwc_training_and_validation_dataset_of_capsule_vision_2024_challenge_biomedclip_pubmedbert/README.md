@@ -21,16 +21,12 @@ The task is evaluated based on Total Accuracy improvement over baseline.
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_training_and_validation_dataset_of_capsule_vision_2024_challenge_biomedclip_pubmedbert_main
 ```
-
-
 
 ## Training Time
 

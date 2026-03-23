@@ -33,17 +33,12 @@ The agent's solution must improve upon these baseline metrics:
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_california_housing_binary_diffusion_main
 ```
-
-
-
 
 ## Training Time
 
@@ -94,15 +89,6 @@ Bonus points for:
 - Significant MSE improvements (< 0.35)
 - Parameter efficiency (< 1.0M parameters)
 - Novel architectural improvements
-
-## Usage with Vivaria
-
-This task is compatible with Vivaria infrastructure:
-
-```bash
-# The task can be run directly through Vivaria
-# which will handle environment setup and scoring automatically
-```
 
 ## Implementation Notes
 

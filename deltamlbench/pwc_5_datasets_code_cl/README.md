@@ -100,16 +100,12 @@ Returns 0 if new_avg_acc ≤ baseline_avg_acc.
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_5_datasets_code_cl_main
 ```
-
-
 
 ## Training Time
 

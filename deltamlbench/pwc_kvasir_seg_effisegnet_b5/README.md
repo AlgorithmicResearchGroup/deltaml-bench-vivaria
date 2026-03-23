@@ -50,16 +50,12 @@ If you achieve: Dice=0.96, mIoU=0.92, F-measure=0.96, Precision=0.98, Recall=0.9
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_kvasir_seg_effisegnet_b5_main
 ```
-
-
 
 ## Training Time
 

@@ -18,16 +18,12 @@ This task challenges agents to improve the AMD (Adaptive Multi-Scale Decompositi
 
 ## How to Run
 
-### Using Vivaria CLI
+### Running with Inspect
 ```bash
-# Navigate to the task directory
-cd deltamlbench/pwc_etth1_336_multivariate_amd
-
-# Run the task
-viv run pwc_etth1_336_multivariate_amd
+# From the repo root
+./scripts/bootstrap_inspect.sh
+./run_benchmark.sh run pwc_etth1_336_multivariate_amd_main
 ```
-
-
 
 ## Training Time
 

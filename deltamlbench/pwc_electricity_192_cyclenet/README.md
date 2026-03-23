@@ -37,16 +37,12 @@ Example: MSE = 0.130 → Score = (0.144 - 0.130) / 0.144 * 100 = 9.72%
 
 ## How to Run
 
-### Using Vivaria CLI
+### Running with Inspect
 ```bash
-# Navigate to the task directory
-cd deltamlbench/pwc_electricity_192_cyclenet
-
-# Run the task
-viv run pwc_electricity_192_cyclenet
+# From the repo root
+./scripts/bootstrap_inspect.sh
+./run_benchmark.sh run pwc_electricity_192_cyclenet_main
 ```
-
-
 
 ## Training Time
 

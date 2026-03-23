@@ -1,6 +1,6 @@
-# DeltaMLBench
+# DeltaMLBench (Inspect)
 
-DeltaMLBench is now an Inspect-native benchmark for the complete `pwc_*` task families in [`deltamlbench/`](/Users/arg/Desktop/PUBLIC/deltaml-bench-public/deltamlbench).
+DeltaMLBench is an Inspect-native benchmark for the complete `pwc_*` task families in [`deltamlbench/`](/Users/arg/Desktop/PUBLIC/deltaml-bench-public/deltamlbench). This branch is the Inspect runtime branch and is intended to become the standalone `deltaml-bench-inspect` repo.
 
 ## Supported Scope
 
@@ -66,6 +66,8 @@ inspect view start --host 127.0.0.1 --port 7575 --log-dir .inspect-logs
 - [`metr/`](/Users/arg/Desktop/PUBLIC/deltaml-bench-public/metr): compatibility shim for legacy task/scoring imports
 - [`run_benchmark.sh`](/Users/arg/Desktop/PUBLIC/deltaml-bench-public/run_benchmark.sh): simple launcher for listing and running Inspect tasks
 - [`scripts/bootstrap_inspect.sh`](/Users/arg/Desktop/PUBLIC/deltaml-bench-public/scripts/bootstrap_inspect.sh): first-run local setup
+
+Use [`deltamlbench/README.md`](/Users/arg/Desktop/PUBLIC/deltaml-bench-public/deltamlbench/README.md) for task-source documentation. The root README is the only user-facing quickstart for running the benchmark.
 
 ## Notes
 

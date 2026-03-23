@@ -13,16 +13,12 @@ This task challenges agents to improve a Domain Adaptation Neural Network (DANN)
 
 ## How to Run
 
-### Using Vivaria CLI
+### Running with Inspect
 ```bash
-# Navigate to the task directory
-cd deltamlbench/pwc_digital_twin_supported_deep_learning_for_fault_diagnosis_dann
-
-# Run the task
-viv run pwc_digital_twin_supported_deep_learning_for_fault_diagnosis_dann
+# From the repo root
+./scripts/bootstrap_inspect.sh
+./run_benchmark.sh run pwc_digital_twin_supported_deep_learning_for_fault_diagnosis_dann_main
 ```
-
-
 
 ## Training Time
 

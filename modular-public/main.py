@@ -52,8 +52,8 @@ def trim_state(
 
     Parameters:
         state: dict, The state to trim.
-        limit: float, The maximum size for the trimmed state. Vivaria supports up to 100MB,
-            so we're being conservative and defaulting to 75MB.
+        limit: float, The maximum size for the trimmed state. The runtime persists
+            saved state as JSON, so we're being conservative and defaulting to 75MB.
         content_cutoff: int, The number of characters to maintain in messages.
     """
     # TODOs:

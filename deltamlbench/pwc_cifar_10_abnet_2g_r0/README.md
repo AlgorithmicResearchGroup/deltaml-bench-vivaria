@@ -32,17 +32,12 @@ Example: Test Accuracy = 95.5% → Score = (95.5 - 94.118) / 94.118 * 100 = 1.47
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_cifar_10_abnet_2g_r0_main
 ```
-
-
-
 
 ## Training Time
 

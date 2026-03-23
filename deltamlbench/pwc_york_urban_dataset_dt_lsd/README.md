@@ -21,16 +21,12 @@ The task is evaluated based on sAP10 improvement over baseline.
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_york_urban_dataset_dt_lsd_main
 ```
-
-
 
 ## Training Time
 

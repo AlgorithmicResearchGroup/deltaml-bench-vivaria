@@ -36,16 +36,12 @@ Example: Accuracy = 0.930 (93.0%) → Score = (0.930 - 0.902) / 0.902 * 100 = 3.
 
 ## How to Run
 
-### Using Vivaria Manager Script
+### Running with Inspect
 ```bash
-# Navigate to the project root
-cd /path/to/deltaml-bench-public
-
-# Run the task using the manager script
+# From the repo root
+./scripts/bootstrap_inspect.sh
 ./run_benchmark.sh run pwc_fashion_mnist_energize_main
 ```
-
-
 
 ## Training Time
 
