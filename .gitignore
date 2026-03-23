@@ -4,6 +4,8 @@ vivaria_logs/
 vivaria_tokens.txt
 scripts/grading_results/
 
+.inspect*
+
 # Exclude flow-adventures (separate repository)
 flow-adventures/
 
