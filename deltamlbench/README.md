@@ -1,14 +1,34 @@
-# DeltaMLBench
+# DeltaMLBench Tasks
 
-Evaluating frontier AI R&D capabilities of language model agents against human experts
+This directory contains the source task families used by the Inspect-native DeltaMLBench runtime.
 
-We intend for these tasks to serve as example evaluation material aimed at measuring the autonomous AI R&D capabilities of AI agents. 
+## Current Status
 
+- `pwc_*` families are the supported benchmark surface.
+- The Inspect runtime discovers the complete `pwc_*` families automatically and exposes `main` and `hidden_score` variants.
+- `ai_rd_*` families remain in the repo as source material but are not part of the supported Inspect workflow.
 
-## METR Task Standard
-All the tasks in this repo conform to the [METR Task Standard](https://github.com/METR/task-standard).
+## Task Layout
 
-The METR Task Standard is our attempt at defining a common format for tasks. We hope that this format will help facilitate easier task sharing and agent evaluation.
+Most complete `pwc_*` families contain:
 
-See the [setup guide](./setup) for getting started running DeltaMLBench with [Vivaria](https://vivaria.metr.org/) and our open source [agent scaffolding](https://github.com/poking-agents/modular-public).
+- `README.md`
+- `manifest.yaml`
+- `build_steps.json`
+- `requirements.txt`
+- `<task_name>.py`
+- `assets/score.py`
+- `assets/for_agent/solution.py`
+- `anti_cheat_validation/`
 
+The Inspect runtime reuses the existing task assets, setup commands, and scoring code rather than maintaining separate handwritten task ports.
+
+## Running Tasks
+
+Use the repo root workflow:
+
+```bash
+./scripts/bootstrap_inspect.sh
+./run_benchmark.sh list
+./run_benchmark.sh run pwc_cnn_main anthropic/claude-sonnet-4-5
+```

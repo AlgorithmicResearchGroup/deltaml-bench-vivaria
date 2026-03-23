@@ -39,6 +39,7 @@ env/
 ENV/
 .venv/
 .venv-cli/
+.inspect-venv/
 
 # IDE files
 .vscode/
