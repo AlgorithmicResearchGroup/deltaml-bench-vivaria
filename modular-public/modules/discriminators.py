@@ -4,7 +4,7 @@ from functools import partial
 from itertools import product
 from typing import Any, Callable, Coroutine
 
-from pyhooks.types import (
+from runtime_types import (
     MiddlemanResult,
     MiddlemanSettings,
     OpenaiChatMessage,

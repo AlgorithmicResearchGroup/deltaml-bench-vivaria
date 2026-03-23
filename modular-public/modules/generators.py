@@ -3,7 +3,7 @@ from functools import partial
 from itertools import product
 from typing import Optional, cast
 
-from pyhooks.types import MiddlemanSettings, OpenaiChatMessage
+from runtime_types import MiddlemanSettings, OpenaiChatMessage
 
 from base import Agent, Message, hooks
 from templates import (

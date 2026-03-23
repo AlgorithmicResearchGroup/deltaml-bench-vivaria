@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from inspect_ai import Task, task
-from inspect_ai.agent import react
 from inspect_ai.scorer import Score, Target, mean, scorer, stderr
 from inspect_ai.solver._task_state import TaskState
-from inspect_ai.tool import bash, python, text_editor, update_plan
 from inspect_ai.util import sandbox
 
 from deltamlbench_inspect.runtime import (
@@ -15,7 +13,7 @@ from deltamlbench_inspect.runtime import (
     summarize_manifest_meta,
     task_sample,
 )
-from deltamlbench_inspect.tools import score_task, show_task_metadata
+from deltamlbench_inspect.solvers import modular_public_solver
 
 @scorer(metrics=[mean(), stderr()])
 def pwc_score(visible_score: bool = True):
@@ -37,25 +35,6 @@ def pwc_score(visible_score: bool = True):
 
     return score
 
-def default_solver(visible_score: bool, task_meta: dict[str, object]):
-    tools = [
-        bash(timeout=1800),
-        python(timeout=1800),
-        text_editor(timeout=1800),
-        update_plan(),
-        show_task_metadata(task_meta),
-    ]
-    if visible_score:
-        tools.append(score_task(visible_score=True))
-    return react(
-        prompt=(
-            "You are solving a DeltaMLBench PWC task inside a Linux sandbox. "
-            "Edit /home/agent/solution/solution.py, use the local files and datasets, and submit once the solution "
-            "is coherent. Never fabricate metrics."
-        ),
-        tools=tools,
-    )
-
 _SPECS = {spec.name: spec for spec in discover_pwc_specs()}
 
 def _build_named_task(task_name: str, variant_name: str) -> Task:
@@ -70,7 +49,7 @@ def _build_named_task(task_name: str, variant_name: str) -> Task:
     }
     return Task(
         dataset=[task_sample(spec, variant)],
-        solver=default_solver(variant.visible_score, task_meta),
+        solver=modular_public_solver(),
         scorer=pwc_score(variant.visible_score),
         sandbox=("docker", SANDBOX_DOCKERFILE),
         time_limit=8 * 60 * 60,

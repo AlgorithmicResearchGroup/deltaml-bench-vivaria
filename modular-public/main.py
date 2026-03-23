@@ -123,8 +123,7 @@ async def main(*args):
         timeout=default_timeout,
     )
 
-    with open("/home/agent/settings.json") as f:
-        settings = Settings(**json.loads(f.read()))
+    settings = Settings(**hooks.load_settings("/home/agent/settings.json"))
 
     if os.environ.get("STARTING_STATE"):
         state = State.parse_obj(json.loads(os.environ["STARTING_STATE"])["state"])

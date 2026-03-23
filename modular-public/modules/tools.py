@@ -4,7 +4,7 @@ from pathlib import Path
 import textwrap
 from typing import Any
 
-from pyhooks.types import MiddlemanSettings, OpenaiChatMessage
+from runtime_types import MiddlemanSettings, OpenaiChatMessage
 
 from base import State, actions, hooks
 from templates import default_timeout

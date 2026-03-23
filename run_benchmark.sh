@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TASK_FILE="$ROOT_DIR/deltamlbench_inspect/tasks/pwc.py"
 DEFAULT_MODEL="${INSPECT_EVAL_MODEL:-${OPENAI_MODEL:-openai/gpt-4.1-mini}}"
-DEFAULT_SOLVER="$ROOT_DIR/deltamlbench_inspect/agents.py@pwc_react"
+DEFAULT_SOLVER="$ROOT_DIR/deltamlbench_inspect/solvers.py@modular_public_solver"
 INSPECT_BIN="${INSPECT_BIN:-$ROOT_DIR/.inspect-venv/bin/inspect}"
 
 if [[ ! -x "$INSPECT_BIN" ]]; then
@@ -26,7 +26,7 @@ Usage:
 Examples:
   ./run_benchmark.sh list
   ./run_benchmark.sh smoke anthropic/claude-sonnet-4-5
-  ./run_benchmark.sh run pwc_cnn_main openai/gpt-4.1-mini $ROOT_DIR/deltamlbench_inspect/agents.py@modular_public_bridge
+  ./run_benchmark.sh run pwc_cnn_main openai/gpt-4.1-mini $ROOT_DIR/deltamlbench_inspect/solvers.py@modular_public_solver
 EOF
 }
 

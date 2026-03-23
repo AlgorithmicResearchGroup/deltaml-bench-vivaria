@@ -4,8 +4,9 @@ import json
 from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
-from pyhooks import Actions, Hooks
-from pyhooks.types import RatingOption
+
+from inspect_runtime import Actions, Hooks
+from runtime_types import RatingOption
 
 hooks = Hooks()
 actions = Actions()
@@ -191,6 +192,7 @@ class Agent(BaseModel):
             )
         self.log(message)
         self.state.generate_node(message, parent, children, metadata)
+        hooks.sync_messages(self.state)
 
     def log(self, message: Message):
         step_kind = None
